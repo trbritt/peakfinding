@@ -308,9 +308,36 @@ class labeled_image:
         -------
         lattice_points : np array of reflections
         idx            : iterable containing what reflection each element of `lattice_points` is
+
+        Notes
+        -----
+        Idea behind this function:
+            (i)     generate lattice determined by the two closest detected peaks
+            (ii)    keep only points inside image dimensions
+            (iii)   sort both detected peaks and lattice points by increasing
+                        radius from centroid
+            (iv)    the sets of peaks should be close to each other but won't be
+                        exact, so we do SVD to determine how to translate
+                        `n` detected peaks to `n` lattice points
+                        (a) translation will be small but necessary to correctly
+                            identify the exact detected peak with the reflection
+            (v)     for the lattice points identified with detected peaks, their
+                    value will now be the translated value so the peaks and 
+                    generated lattice points will be as close to each other 
+                    as can be. Lattice points corresponding to relfections not
+                    seen in the image will be left untouched and are thus pred-
+                    ictions of where the reflections should be based on the 
+                    Bragg peaks automatically determined.
         """
         
         sorted_peaks = self.sort_peaks(x, y)          
+        # self.__ma = 3.199
+        # self.__mb = 3.199
+        # self.__mc = 6.494
+        # self.__malpha = 90.00 * np.pi / 180
+        # self.__mbeta = 90.00 * np.pi / 180
+        # self.__mgamma = 120.00 * np.pi / 180
+
         if np.any(np.array([self.__ma,self.__mb, self.__mc, self.__malpha,self.__mbeta, self.__mgamma])==-1.0):
             print(f"Unit cell lengths (a,b,c) and/or relative angles (alpha, beta, gamma) for `{self.__mImage}` not set...")
             print("Using two peaks closest to centroid as basis of reciprocal lattice ...")
@@ -341,13 +368,13 @@ class labeled_image:
         trans_unrolled_lattice = (ret_R@unrolled_lattice) + ret_t
         #for the lattice points picked up by peak detection, take
         #lattice_point --> transformed_lattice_point 
-        # for m in range(lattice_points.shape[0]):
-        #     tmp = lattice_points[m]
-        #     if tmp in unrolled_lattice:
-        #         deltas = trans_unrolled_lattice - tmp
-        #         dist_2 = np.einsum("ij,ij->i", deltas, deltas)
-        #         min_idx = np.argmin(dist_2)
-        #         lattice_points[m] = trans_unrolled_lattice[min_idx]
+        for m in range(lattice_points.shape[0]):
+            tmp = lattice_points[m]
+            if tmp in unrolled_lattice:
+                deltas = trans_unrolled_lattice - tmp
+                dist_2 = np.einsum("ij,ij->i", deltas, deltas)
+                min_idx = np.argmin(dist_2)
+                lattice_points[m] = trans_unrolled_lattice[min_idx]
 
         return lattice_points, idx
 

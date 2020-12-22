@@ -112,7 +112,7 @@ if __name__ == "__main__":
     # ============================================
     # Below tests peak finding on greyscale image
     # ============================================
-    test_bw = True
+    test_bw = False
     if test_bw:
         BW_image = "test_BW.jpg"
 
