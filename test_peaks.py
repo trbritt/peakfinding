@@ -21,13 +21,14 @@
 from image import *
 from skimage import img_as_float
 
+
 def plot_img_and_hist(image, axes, bins=256):
     """Plot an image along with its histogram and cumulative histogram.
     Parameters
     ----------
     image : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
-    axes  : matplotlib.pyplo.axes objects to be used to plot results 
-    bins  : int of bins used in numpy histogram call for plotting on 
+    axes  : matplotlib.pyplo.axes objects to be used to plot results
+    bins  : int of bins used in numpy histogram call for plotting on
             matplotlib axis object
 
     Returns
@@ -70,9 +71,8 @@ if __name__ == "__main__":
     if test_color:
         RGB_image = "test_RGB.jpg"
         test_color = labeled_image(RGB_image)
-        i,j = test_color.peaks(alpha=20, size=10)
-        lattice_points, idx = test_color.labeled_peaks(i,j)
-
+        i, j = test_color.peaks(alpha=20, size=10)
+        lattice_points, idx = test_color.labeled_peaks(i, j)
         # let's see the results
         # Display results
         fig = plt.figure(figsize=(12, 8))
@@ -89,8 +89,9 @@ if __name__ == "__main__":
         ax_hist.set_ylabel("Number of pixels")
         ax_hist.set_yticks(np.linspace(0, y_max, 5))
 
-        ax_img, ax_hist, ax_cdf = plot_img_and_hist(test_color.corrected_data, axes[:, 1])
-        
+        ax_img, ax_hist, ax_cdf = plot_img_and_hist(
+            test_color.corrected_data, axes[:, 1]
+        )
 
         ax_img.plot(lattice_points[:, 0], lattice_points[:, 1], "gx", ms=10)
 
@@ -118,13 +119,13 @@ if __name__ == "__main__":
 
         test_BW = labeled_image(BW_image)
         i, j = test_BW.peaks(alpha=10, size=10)
-        lattice_points, idx = test_BW.labeled_peaks(i,j)
+        lattice_points, idx = test_BW.labeled_peaks(i, j)
 
         fig, ax = plt.subplots(1, 2, figsize=(8, 6))
         ax[0].imshow(test_BW.data, cmap=plt.cm.gray)
         ax[0].set_axis_off()
         ax[0].set_title("Original")
-        
+
         ax[1].plot(lattice_points[:, 0], lattice_points[:, 1], "gx", ms=10)
 
         [

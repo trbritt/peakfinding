@@ -9,11 +9,11 @@ def reflect(arr, axis=0, sign=1):
     arr : ndarray of coordiantes to be symmetrized
     axis: direction along which to symmetrize
     sign: relative sign between original and symmetrized values.
-    
+
     Returns
     -------
         : ndarray of total collection of points (orig+reflected)
-    
+
     """
     refl_idx = axis * [slice(None)] + [slice(None, 0, -1), Ellipsis]
     return np.concatenate((arr[tuple(refl_idx)], arr), axis=axis)
@@ -23,7 +23,7 @@ def generate_lattice(min, max, lattice_vectors):
     """Return some points from a 2-d lattice (with the origin first).
     Parameters
     ----------
-    min             : iterable representing (min(x),min(y)) coordinate in cartesian grid 
+    min             : iterable representing (min(x),min(y)) coordinate in cartesian grid
     max             : iterable representing (max(x),max(y)) coordinate in cartesian grid
     lattice_vectors : vectors used to transform the cartesian grid to reciprocal grid.
 
@@ -62,7 +62,7 @@ def rank_of_first(xs, axis=0):
 
     Returns
     -------
-            : ndarray of indices telling how to sort the elements of xs 
+            : ndarray of indices telling how to sort the elements of xs
     """
     return np.argpartition(np.argsort(xs, axis=axis), 0, axis=axis)[0, :]
 
@@ -74,7 +74,7 @@ def brillouin_zone_index(x, lattice):
     ----------
     x       : ndarray whose last dimension represents spatial coordinates
     lattice : ndarray of whose first dimension indexes over
-              lattice points, with the origin given as the first lattice 
+              lattice points, with the origin given as the first lattice
               point.
 
     Returns
@@ -91,16 +91,16 @@ def brillouin_zone_index(x, lattice):
 
 
 def reciprocal_vectors3D(a, b, c, alpha, beta, gamma):
-    """Takes real space unit cell side lengths (a,b,c) and relative angles 
-    (alpha, beta, gamma), and determines the real space vectors and 
+    """Takes real space unit cell side lengths (a,b,c) and relative angles
+    (alpha, beta, gamma), and determines the real space vectors and
     reciprocal vectors.
     Parameters
     ----------
-    a       : float32(64) representing seperation of atoms in unit cell 
-    b       : float32(64) representing seperation of atoms in unit cell 
-    c       : float32(64) representing seperation of atoms in unit cell 
-    alpha   : float32(64) denoting angle between b and c 
-    beta    : float32(64) denoting angle between a and c 
+    a       : float32(64) representing seperation of atoms in unit cell
+    b       : float32(64) representing seperation of atoms in unit cell
+    c       : float32(64) representing seperation of atoms in unit cell
+    alpha   : float32(64) denoting angle between b and c
+    beta    : float32(64) denoting angle between a and c
     gamma   : float32(64) denoting angle between b and a
 
     Returns
@@ -179,4 +179,3 @@ def test_BZ():
     )
     plt.axes().set_aspect("equal")
     plt.show()
-

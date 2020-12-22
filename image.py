@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import warnings
 
+
 class labeled_image:
     def __init__(self, image, gamma=2.40):
         self.__mImage = image
@@ -17,7 +18,7 @@ class labeled_image:
         self.__mb = -1.0
         self.__mc = -1.0
         self.__malpha = -1.0
-        self.__mbeta  = -1.0
+        self.__mbeta = -1.0
         self.__mgamma = -1.0
 
     @property
@@ -95,8 +96,8 @@ class labeled_image:
             self.__mDataCorrected = self.grey2gamma(self.__mData, gamma)
         self.__mWidth, self.__mHeight = self.__mDataCorrected.shape
 
-    def rgb2gamma(self,rgb, gamma=2.40):
-        """Gamma corrects RGB image 
+    def rgb2gamma(self, rgb, gamma=2.40):
+        """Gamma corrects RGB image
         Parameters
         ----------
         rgb : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
@@ -114,9 +115,8 @@ class labeled_image:
         )
         return nonlinear
 
-
-    def grey2gamma(self,grey, gamma=2.40):
-        """Gamma corrects greyscale image 
+    def grey2gamma(self, grey, gamma=2.40):
+        """Gamma corrects greyscale image
         Parameters
         ----------
         grey : ndarray ([M[, N[, ...P]]) of ints, uints or floats
@@ -130,8 +130,7 @@ class labeled_image:
         nonlinear = np.where(grey > cutoff, 1.055 * pow(grey, 1 / gamma) - 0.055, grey)
         return nonlinear
 
-
-    def get_std(self,image):
+    def get_std(self, image):
         """Returns standard deviation along default axis of an array of floats (derived from image)
         Parameters
         ----------
@@ -143,15 +142,14 @@ class labeled_image:
         """
         return np.std(image)
 
-
-    def close_points(self,px, py, mindist, remove=True):
+    def close_points(self, px, py, mindist, remove=True):
         """Uses method of quadtrees to remove points less than mindist away from each other point
         Parameters
         ----------
-        px      : iterable containing x coordinates 
-        py      : iterable containing y coordinates 
+        px      : iterable containing x coordinates
+        py      : iterable containing y coordinates
         mindist : maximum side length of a square in the quadtree
-                directly corresponding to the minimum distance 
+                directly corresponding to the minimum distance
                 allowed between any two pairs of points in (px,py)
 
         Returns
@@ -162,7 +160,7 @@ class labeled_image:
         y       : list (can be any iterable) containing y coordinates
                     of scrubbed list of points, where neighbors less than mindist away
                     from each other have been removed
-        
+
         Notes
         -----
         https://en.wikipedia.org/wiki/Quadtree
@@ -197,13 +195,12 @@ class labeled_image:
             exclude.update({n: None for n in nhoods if n != i})
 
         exclude = list(exclude.keys())
-        if (remove):
+        if remove:
             res_points = np.delete(rare_points, exclude, axis=0)
             x = res_points[:, 0]
             y = res_points[:, 1]
 
             return x, y
-
 
     def peaks(self, alpha=20, size=10):
         """Determines peaks in 2D images
@@ -211,16 +208,16 @@ class labeled_image:
         ----------
         image : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
         sigma : standard deviation of a given array (image)
-        alpha : number of standard deviations to use to determine peak true 
+        alpha : number of standard deviations to use to determine peak true
                 or false of a given coordinate in image
-        
+
         Returns
         -------
         i_out : list - x coordinates of peaks
         j_out : list - y coordinates of peaks
 
         """
-        sigma=self.get_std(self.__mDataCorrected)
+        sigma = self.get_std(self.__mDataCorrected)
         i_out = []
         j_out = []
         image_temp = copy.deepcopy(self.__mDataCorrected)
@@ -235,21 +232,23 @@ class labeled_image:
                 y = np.arange(j - size, j + size)
                 xv, yv = np.meshgrid(x, y)
                 image_temp[
-                    yv.clip(0, image_temp.shape[0] - 1), xv.clip(0, image_temp.shape[1] - 1)
+                    yv.clip(0, image_temp.shape[0] - 1),
+                    xv.clip(0, image_temp.shape[1] - 1),
                 ] = 0
             else:
                 break
         ni_out, nj_out = [i / width for i in i_out], [j / height for j in j_out]
         ni_out, nj_out = self.close_points(ni_out, nj_out, 0.1)
-        i_out, j_out = [int(i * width) for i in ni_out], [int(j * height) for j in nj_out]
+        i_out, j_out = [int(i * width) for i in ni_out], [
+            int(j * height) for j in nj_out
+        ]
         return i_out, j_out
 
-
-    def get_center(self,x, y):
+    def get_center(self, x, y):
         """Returns centroid of given points in (xy) plane
         Parameters
         ----------
-        x   : ndarray of x coordinates 
+        x   : ndarray of x coordinates
         y   : ndarray of y coordinates
 
         Returns
@@ -259,18 +258,17 @@ class labeled_image:
         nPeaks = len(x)
         return np.array([np.sum(x) / nPeaks, np.sum(y) / nPeaks])
 
-
-    def sort_peaks(self,x, y):
+    def sort_peaks(self, x, y):
         """Sorts coordinates (xy) into order of increasing radius
         from the centroid
         Parameters
         ----------
-        x   : ndarray of x coordinates 
+        x   : ndarray of x coordinates
         y   : ndarray of y coordinates
 
         Returns
         -------
-        x   : ndarray of sorted x coordinates 
+        x   : ndarray of sorted x coordinates
         y   : ndarray of sorted y coordinates
 
         Notes
@@ -295,14 +293,13 @@ class labeled_image:
             nodes = nodes[nodes != peaks[s]].reshape((nRemaining, 2))
         return peaks
 
-
-    def labeled_peaks(self,x, y):
+    def labeled_peaks(self, x, y):
         """Takes peaks and returns lattice coordinates and iterable of strings
         corresponding to the reflection (hk) of each lattice points
         Parameters
         ----------
-        x       : ndarray of x coordinates 
-        y       : ndarray of y 
+        x       : ndarray of x coordinates
+        y       : ndarray of y
 
         Returns
         -------
@@ -322,15 +319,15 @@ class labeled_image:
                         (a) translation will be small but necessary to correctly
                             identify the exact detected peak with the reflection
             (v)     for the lattice points identified with detected peaks, their
-                    value will now be the translated value so the peaks and 
-                    generated lattice points will be as close to each other 
+                    value will now be the translated value so the peaks and
+                    generated lattice points will be as close to each other
                     as can be. Lattice points corresponding to relfections not
                     seen in the image will be left untouched and are thus pred-
-                    ictions of where the reflections should be based on the 
+                    ictions of where the reflections should be based on the
                     Bragg peaks automatically determined.
         """
-        
-        sorted_peaks = self.sort_peaks(x, y)          
+
+        sorted_peaks = self.sort_peaks(x, y)
         # self.__ma = 3.199
         # self.__mb = 3.199
         # self.__mc = 6.494
@@ -338,36 +335,62 @@ class labeled_image:
         # self.__mbeta = 90.00 * np.pi / 180
         # self.__mgamma = 120.00 * np.pi / 180
 
-        if np.any(np.array([self.__ma,self.__mb, self.__mc, self.__malpha,self.__mbeta, self.__mgamma])==-1.0):
-            print(f"Unit cell lengths (a,b,c) and/or relative angles (alpha, beta, gamma) for `{self.__mImage}` not set...")
-            print("Using two peaks closest to centroid as basis of reciprocal lattice ...")
+        if np.any(
+            np.array(
+                [
+                    self.__ma,
+                    self.__mb,
+                    self.__mc,
+                    self.__malpha,
+                    self.__mbeta,
+                    self.__mgamma,
+                ]
+            )
+            == -1.0
+        ):
+            print(
+                f"Unit cell lengths (a,b,c) and/or relative angles (alpha, beta, gamma) for `{self.__mImage}` not set..."
+            )
+            print(
+                "Using two peaks closest to centroid as basis of reciprocal lattice ..."
+            )
             lat_vec = np.vstack(
-                (np.array([sorted_peaks[0,0], sorted_peaks[0,1]]), np.array([sorted_peaks[1,0], sorted_peaks[1,1]]))
+                (
+                    np.array([sorted_peaks[0, 0], sorted_peaks[0, 1]]),
+                    np.array([sorted_peaks[1, 0], sorted_peaks[1, 1]]),
+                )
             )
         else:
-            u,v,_ = bz.reciprocal_vectors3D(self.__ma, self.__mb, self.__mc, self.__malpha, self.__mbeta, self.__mgamma)
-            lat_vec = np.vstack(
-                (u[:2], v[:2])
+            u, v, _ = bz.reciprocal_vectors3D(
+                self.__ma,
+                self.__mb,
+                self.__mc,
+                self.__malpha,
+                self.__mbeta,
+                self.__mgamma,
             )
+            lat_vec = np.vstack((u[:2], v[:2]))
 
-        centroid = self.get_center(sorted_peaks[:,0], sorted_peaks[:,1])
+        centroid = self.get_center(sorted_peaks[:, 0], sorted_peaks[:, 1])
         lat_vec = lat_vec - centroid
         lattice_points, idx = bz.generate_lattice(
             min=(-4, -3), max=(6, 6), lattice_vectors=lat_vec
-        )    
+        )
 
         lattice_points += centroid
-        lattice_points, idx =  self.trimmed(lattice_points, idx)
-        sorted_lattice = self.sort_peaks(lattice_points[:,0], lattice_points[:,1])
+        lattice_points, idx = self.trimmed(lattice_points, idx)
+        sorted_lattice = self.sort_peaks(lattice_points[:, 0], lattice_points[:, 1])
 
-        unrolled_peaks = sorted_peaks.reshape(-1,2)
-        #get lattice points corresponding to reflections determined by peak detection
-        unrolled_lattice = sorted_lattice.reshape(-1,2)[:unrolled_peaks.shape[0],:]
-        #SVD to transform lattice points to peaks detected
-        ret_R, ret_t = self.rigid_transform_3D(unrolled_lattice,unrolled_peaks)
-        trans_unrolled_lattice = (ret_R@unrolled_lattice) + ret_t
-        #for the lattice points picked up by peak detection, take
-        #lattice_point --> transformed_lattice_point 
+        unrolled_peaks = sorted_peaks.reshape(-1, 2)
+        # get lattice points corresponding to reflections determined by peak detection
+        unrolled_lattice = sorted_lattice.reshape(-1, 2)[: unrolled_peaks.shape[0], :]
+
+        # SVD to transform lattice points to peaks detected
+        ret_R, ret_t = self.rigid_transform_3D(unrolled_lattice, unrolled_peaks)
+        trans_unrolled_lattice = (ret_R @ unrolled_lattice) + ret_t
+        # for the lattice points picked up by peak detection, take
+        # lattice_point --> transformed_lattice_point
+
         for m in range(lattice_points.shape[0]):
             tmp = lattice_points[m]
             if tmp in unrolled_lattice:
@@ -375,12 +398,28 @@ class labeled_image:
                 dist_2 = np.einsum("ij,ij->i", deltas, deltas)
                 min_idx = np.argmin(dist_2)
                 lattice_points[m] = trans_unrolled_lattice[min_idx]
-
+        self.__mLatticePoints = lattice_points
+        self.__mIDX           = idx
         return lattice_points, idx
 
+    def reflection(self, h, k, l):
+        """Returns coordinates in lattice of (`h`,`k`,`l`) reflection
+        Parameters
+        ----------
+        h   :   int, miller index in `u` direction
+        k   :   int, miller index in `v` direction
+        l   :   int, miller index in `w` direction, which, since this class only
+                handles 2D images, should always be zero
 
+        Returns
+        -------
+            :   nparray of coordinates corresponding to the above reflection
 
-    def rigid_transform_3D(self,A, B):
+        """
+        assert(l==0),"Image is 2D, only reflections of form (h, k, l=0) allowed"
+        return self.__mLatticePoints[self.__mIDX.index(str(k)+str(k)+str(l))]
+
+    def rigid_transform_3D(self, A, B):
         """Perform SVD decomp of two sets of points `A` and `B`
         Parameters
         ----------
@@ -390,7 +429,7 @@ class labeled_image:
 
         Returns
         -------
-        R   : ndarray - transformation (rotation, scaling, rotation) matrix 
+        R   : ndarray - transformation (rotation, scaling, rotation) matrix
         t   : ndarary - translation vector
         """
         # assert A.shape == B.shape
@@ -418,7 +457,7 @@ class labeled_image:
         H = Am @ np.transpose(Bm)
 
         # sanity check
-        #if linalg.matrix_rank(H) < 3:
+        # if linalg.matrix_rank(H) < 3:
         #    raise ValueError("rank of H = {}, expecting 3".format(linalg.matrix_rank(H)))
 
         # find rotation
@@ -428,20 +467,20 @@ class labeled_image:
         # special reflection case
         if np.linalg.det(R) < 0:
             print("det(R) < R, reflection detected!, correcting for it ...")
-            Vt[2,:] *= -1
+            Vt[2, :] *= -1
             R = Vt.T @ U.T
 
         t = -R @ centroid_A + centroid_B
 
         return R, t
 
-    def trimmed(self,lat_pts, index):
+    def trimmed(self, lat_pts, index):
         """Takes peaks and returns only reflections inside target image and iterable of strings
-        corresponding to the reflection (hk) of each of said lattice points 
+        corresponding to the reflection (hk) of each of said lattice points
         Parameters
         ----------
-        x       : ndarray of x coordinates 
-        y       : ndarray of y 
+        x       : ndarray of x coordinates
+        y       : ndarray of y
 
         Returns
         -------
@@ -460,4 +499,3 @@ class labeled_image:
             if b1 and b2 and b3 and b4:
                 mask[m] = 1
         return lat_pts[np.where(mask)[0]], [index[i] for i in np.where(mask)[0]]
-
