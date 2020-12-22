@@ -109,6 +109,7 @@ if __name__ == "__main__":
 
         # prevent overlap of y-axis labels
         fig.tight_layout()
+        plt.savefig("test_RGB_fitted.jpg")
         plt.show()
     # ============================================
     # Below tests peak finding on greyscale image
