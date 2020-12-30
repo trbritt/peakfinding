@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import requests
 
+API_KEY = "f8yWDnvmQ13sL1hm"
 
 def reflect(arr, axis=0, sign=1):
     """Reflect the elements of a numpy array along a specified axis about the first element.
@@ -137,14 +139,9 @@ def reciprocal_vectors3D(a, b, c, alpha, beta, gamma):
 
 def test_BZ():
     # ML-MoS2 specs
-    a = 3.199
-    b = 3.199
-    c = 6.494
-    alpha = 90.00 * np.pi / 180
-    beta = 90.00 * np.pi / 180
-    gamma = 120.00 * np.pi / 180
-
-    u, v, w = reciprocal_vectors3D(a, b, c, alpha, beta, gamma)
+    #use api call to material project
+    a,b,c,alpha,beta,gamma = get_parameters("mp-1238797")
+    u, v, _ = reciprocal_vectors3D(a, b, c, alpha, beta, gamma)
 
     img_max = (2.0, 2.0)
     res = 0.001
@@ -179,3 +176,14 @@ def test_BZ():
     )
     plt.axes().set_aspect("equal")
     plt.show()
+
+def get_parameters(material):
+    api_url = f'https://www.materialsproject.org/rest/v2/materials/{material}/vasp?API_KEY={API_KEY}&types=final_structure'
+    data = requests.get(api_url).json()
+    a = float(data['response'][0]['cif'].split('\n')[3].split('   ')[1])
+    b = float(data['response'][0]['cif'].split('\n')[4].split('   ')[1])
+    c = float(data['response'][0]['cif'].split('\n')[5].split('   ')[1])
+    alpha = float(data['response'][0]['cif'].split('\n')[6].split('   ')[1]) * np.pi/180
+    beta  = float(data['response'][0]['cif'].split('\n')[7].split('   ')[1]) * np.pi/180
+    gamma = float(data['response'][0]['cif'].split('\n')[8].split('   ')[1]) * np.pi/180
+    return a, b, c, alpha, beta, gamma    
