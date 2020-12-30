@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import requests
-
-API_KEY = "f8yWDnvmQ13sL1hm"
+from secrets import API_KEY
 
 def reflect(arr, axis=0, sign=1):
     """Reflect the elements of a numpy array along a specified axis about the first element.
