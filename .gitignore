@@ -1,2 +1,4 @@
 *.json
 secrets.py
+test_SVD.py
+ImageRegistration/
