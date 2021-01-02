@@ -239,9 +239,10 @@ class labeled_image:
                 break
         ni_out, nj_out = [i / width for i in i_out], [j / height for j in j_out]
         ni_out, nj_out = self.close_points(ni_out, nj_out, 0.1)
-        i_out, j_out = [int(i * width) for i in ni_out], [
-            int(j * height) for j in nj_out
-        ]
+        i_out, j_out = (
+            [int(i * width) for i in ni_out],
+            [int(j * height) for j in nj_out],
+        )
         return i_out, j_out
 
     def get_center(self, x, y):
@@ -293,7 +294,7 @@ class labeled_image:
             nodes = nodes[nodes != peaks[s]].reshape((nRemaining, 2))
         return peaks
 
-    def labeled_peaks(self, x, y):
+    def labeled_peaks(self, x, y, max_bz = 5, register_lattice=True):
         """Takes peaks and returns lattice coordinates and iterable of strings
         corresponding to the reflection (hk) of each lattice points
         Parameters
@@ -354,12 +355,8 @@ class labeled_image:
             print(
                 "Using two peaks closest to centroid as basis of reciprocal lattice ..."
             )
-            lat_vec = np.vstack(
-                (
-                    np.array([sorted_peaks[0, 0], sorted_peaks[0, 1]]),
-                    np.array([sorted_peaks[1, 0], sorted_peaks[1, 1]]),
-                )
-            )
+            lat_vec = sorted_peaks[:2].reshape(-1,2)
+            print(lat_vec)
         else:
             u, v, _ = bz.reciprocal_vectors3D(
                 self.__ma,
@@ -374,7 +371,7 @@ class labeled_image:
         centroid = self.get_center(sorted_peaks[:, 0], sorted_peaks[:, 1])
         lat_vec = lat_vec - centroid
         lattice_points, idx = bz.generate_lattice(
-            min=(-4, -3), max=(6, 6), lattice_vectors=lat_vec
+            min=(-max_bz, -max_bz), max=(max_bz, max_bz), lattice_vectors=lat_vec
         )
 
         lattice_points += centroid
@@ -390,16 +387,16 @@ class labeled_image:
         trans_unrolled_lattice = (ret_R @ unrolled_lattice) + ret_t
         # for the lattice points picked up by peak detection, take
         # lattice_point --> transformed_lattice_point
-
-        for m in range(lattice_points.shape[0]):
-            tmp = lattice_points[m]
-            if tmp in unrolled_lattice:
-                deltas = trans_unrolled_lattice - tmp
-                dist_2 = np.einsum("ij,ij->i", deltas, deltas)
-                min_idx = np.argmin(dist_2)
-                lattice_points[m] = trans_unrolled_lattice[min_idx]
-        self.__mLatticePoints = lattice_points
-        self.__mIDX           = idx
+        if register_lattice:
+            for m in range(lattice_points.shape[0]):
+                tmp = lattice_points[m]
+                if tmp in unrolled_lattice:
+                    deltas = trans_unrolled_lattice - tmp
+                    dist_2 = np.einsum("ij,ij->i", deltas, deltas)
+                    min_idx = np.argmin(dist_2)
+                    lattice_points[m] = trans_unrolled_lattice[min_idx]
+            self.__mLatticePoints = lattice_points
+            self.__mIDX = idx
         return lattice_points, idx
 
     def reflection(self, h, k, l):
@@ -416,8 +413,8 @@ class labeled_image:
             :   nparray of coordinates corresponding to the above reflection
 
         """
-        assert(l==0),"Image is 2D, only reflections of form (h, k, l=0) allowed"
-        return self.__mLatticePoints[self.__mIDX.index(str(k)+str(k)+str(l))]
+        assert l == 0, "Image is 2D, only reflections of form (h, k, l=0) allowed"
+        return self.__mLatticePoints[self.__mIDX.index(str(k) + str(k) + str(l))]
 
     def rigid_transform_3D(self, A, B):
         """Perform SVD decomp of two sets of points `A` and `B`
