@@ -67,7 +67,7 @@ if __name__ == "__main__":
     # Plots image, pixel CDF, and histograms
     # before and after gamma corr. + peak finding
     # ============================================
-    test_color = True
+    test_color = False
     if test_color:
         RGB_image = "test_RGB.jpg"
         test_color = labeled_image(RGB_image)
@@ -114,13 +114,13 @@ if __name__ == "__main__":
     # ============================================
     # Below tests peak finding on greyscale image
     # ============================================
-    test_bw = False
+    test_bw = True
     if test_bw:
         BW_image = "test_BW.jpg"
 
         test_BW = labeled_image(BW_image)
         i, j = test_BW.peaks(alpha=10, size=10)
-        lattice_points, idx = test_BW.labeled_peaks(i, j)
+        lattice_points, idx = test_BW.labeled_peaks(i, j, max_bz=4, register_lattice=True)
 
         fig, ax = plt.subplots(1, 2, figsize=(8, 6))
         ax[0].imshow(test_BW.data, cmap=plt.cm.gray)
@@ -135,10 +135,11 @@ if __name__ == "__main__":
             )
             for m in range(len(idx))
         ]
-
+        centroid = test_BW.get_center(i,j)
         ax[1].imshow(test_BW.corrected_data, cmap=plt.cm.gray)
         ax[1].set_axis_off()
         ax[1].plot(i, j, "ro", markersize=10, alpha=0.5)
+        ax[1].plot(centroid[0],centroid[1], "c^", markersize=10, alpha=0.5)
         ax[1].set_title("Greyscale + Gamma Corrected")
         fig.tight_layout()
 
